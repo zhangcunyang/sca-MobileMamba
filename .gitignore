@@ -1,0 +1,12 @@
+# 忽略数据集文件
+datasets/raw/ASCAD_fixed_key.h5
+
+# 推荐额外忽略的文件
+*.h5
+*.csv
+*.npy
+*.pkl
+*.zip
+__pycache__/
+*.pyc
+.idea/
