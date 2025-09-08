@@ -86,7 +86,7 @@ def compute_log_prob(output, plaintext_byte, key_guess):
     label = sbox_table[plaintext_byte ^ key_guess]
     return output[label].item()  # 返回这个 label 的概率（softmax 前）
 
-def evaluate_guessing_entropy(model, dataloader, plaintexts, real_key, device, target_byte=2, max_traces=1000):
+def evaluate_guessing_entropy(model, dataloader, plaintexts, real_key, device, target_byte=0, max_traces=1000):
     model.eval()
     key_guesses = np.zeros(256)
     ge_curve = []
@@ -116,7 +116,7 @@ def evaluate_guessing_entropy(model, dataloader, plaintexts, real_key, device, t
     return ge_curve
 
 
-def check_label_consistency(h5_path, label_array, target_byte=2, sample_num=100 ):
+def check_label_consistency(h5_path, label_array, target_byte=0, sample_num=100 ):
     """
     验证 label_array 是否等于 Sbox(plaintext ⊕ key)
     h5_path: ASCAD .h5 文件路径

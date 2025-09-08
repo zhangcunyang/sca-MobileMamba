@@ -12,6 +12,7 @@ def train_one_epoch(model, dataloader, optimizer, criterion, device):
         output = model(x)
         loss = criterion(output, y)
         loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)  # 梯度裁剪
         optimizer.step()
         total_loss += loss.item()
 

@@ -29,7 +29,7 @@ class RealMambaBlock(nn.Module):
         # output proj
         self.out_proj = nn.Linear(dim, dim, bias=False)
 
-        self.norm = nn.LayerNorm(dim)
+        self.norm = nn.BatchNorm1d(dim)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -60,8 +60,9 @@ class RealMambaBlock(nn.Module):
         v_rest  = v[..., self.state_dim:]
 
         for t in range(T):
-            h = A * h + Bp * v_state[:, t, :]
-            y_t_state = C * h + D * v_state[:, t, :]
+            v_state_t = u[:, t, :self.state_dim] * v_state[:, t, :]  # 添加Hadamard乘法
+            h = A * h + Bp * v_state_t
+            y_t_state = C * h + D * v_state_t
             y_t = torch.cat([y_t_state, v_rest[:, t, :]], dim=-1)
             y.append(y_t)
 
@@ -70,7 +71,10 @@ class RealMambaBlock(nn.Module):
         # 4) gated aggregation + residual
         out = self.out_proj(gate * y)
         out = self.dropout(out)
-        return self.norm(residual + out)
+        # BatchNorm1d需要(B, C, T)格式
+        out_residual = (residual + out).permute(0, 2, 1)
+        out_normalized = self.norm(out_residual).permute(0, 2, 1)
+        return out_normalized
 
 
 # -----------------------------------------------------------
@@ -109,7 +113,7 @@ class MobileMambaSCA(nn.Module):
         self.pool = nn.AdaptiveAvgPool1d(1)
 
         self.head = nn.Sequential(
-            nn.LayerNorm(dim),
+            nn.BatchNorm1d(dim),
             nn.Linear(dim, dim),
             nn.GELU(),
             nn.Dropout(dropout),

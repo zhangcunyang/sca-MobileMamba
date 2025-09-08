@@ -24,6 +24,7 @@ class TraceDatasetHighOrder(Dataset):
         # 预计算二阶中心化
         x_centered = self.X - self.X.mean(axis=1, keepdims=True)
         x2 = x_centered ** 2                     # (N, T)
+        x2 *= 0.5                                # 缩放因子，平衡两通道量级
 
         # 组合为 (N, 2, T)
         self.X = np.stack([self.X, x2], axis=1)

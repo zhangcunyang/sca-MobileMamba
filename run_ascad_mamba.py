@@ -14,10 +14,10 @@ from evaluate import evaluate, evaluate_per_class, evaluate_guessing_entropy
 
 # ---------- 配置 ----------
 TARGET_BYTE  = 0
-WINDOW       = (6471, 7271)   # 来自高阶 SNR 扫描
-EPOCHS       = 10
+WINDOW       = (40000, 50000)   # 修复窗口大小到官方建议范围
+EPOCHS       = 40
 BATCH_SIZE   = 128
-LR           = 3e-3
+LR           = 1e-3
 NOISE_STD    = 0.0
 LOG_DIR      = "logs_highorder"
 SAVE_PATH    = "checkpoints/mamba_highorder.pth"
@@ -44,7 +44,8 @@ model  = MobileMambaSCA(input_len=train_X.shape[1],
                         num_blocks=6).to(device)
 
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=LR)
+optimizer = torch.optim.Adam(model.parameters(), lr=LR, weight_decay=1e-4)
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=EPOCHS)
 
 # ---------- 训练 ----------
 train_losses, test_accs = [], []
@@ -52,8 +53,9 @@ for epoch in range(1, EPOCHS + 1):
     print(f"\nEpoch {epoch}/{EPOCHS}")
     loss = train_one_epoch(model, train_dl, optimizer, criterion, device)
     acc  = evaluate(model, test_dl, device)
+    scheduler.step()  # 更新学习率
     train_losses.append(loss); test_accs.append(acc)
-    print(f"  • train_loss={loss:.4f}   test_acc={acc:.4f}")
+    print(f"  • train_loss={loss:.4f}   test_acc={acc:.4f}   lr={scheduler.get_last_lr()[0]:.6f}")
 
 torch.save(model.state_dict(), SAVE_PATH)
 print(f"\n✅ Model saved to {SAVE_PATH}")
