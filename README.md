@@ -12,20 +12,18 @@
 - **多尺度卷积特征提取**: 使用33和51内核的多尺度卷积进行特征融合
 - **多通道支持**: 支持单通道和多通道侧信道数据
 - **高阶特征**: 支持一阶和二阶中心化特征提取
-- **增强评估**: 包含猜测熵分析和t-SNE可视化
+- **完整评估**: 包含准确率、分类摘要和猜测熵分析
 - **ASCAD数据集支持**: 专门针对ASCAD Fixed-Key数据集优化
 
 ## 文件结构
 
 ```
 ├── mobile_mamba.py              # MobileMamba模型架构
-├── ascad_loader_fixed.py        # ASCAD数据集加载器
+├── ascad_loader_fixed.py        # ASCAD数据集加载器  
 ├── trace_dataset_highorder.py   # 高阶特征数据集类
 ├── train.py                     # 训练函数
 ├── evaluate.py                  # 评估函数
-├── enhanced_evaluate.py         # 增强评估功能
-├── run_ascad_mamba.py           # 主训练脚本
-└── run_analysis_single_channel.py  # 单通道分析脚本
+└── run_ascad_mamba.py           # 主训练脚本
 ```
 
 ## 模型架构
@@ -45,11 +43,6 @@ MobileMambaSCA模型包含：
 python run_ascad_mamba.py
 ```
 
-### 运行增强分析
-
-```bash
-python run_analysis_single_channel.py
-```
 
 ## 依赖项
 
